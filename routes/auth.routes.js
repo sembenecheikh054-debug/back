@@ -21,6 +21,11 @@ router.post("/register", async (req, res) => {
                 message: "Email déjà utilisé",
             });
         }
+        res.json({
+   message: "Compte activé avec succès ✅"
+});
+
+
 
         // hash password
         const hash = await bcrypt.hash(password, 10);
@@ -42,13 +47,13 @@ router.post("/register", async (req, res) => {
 
         // lien activation
         const activationLink =
-            `${process.env.CLIENT_URL}/api/auth/verify/${verificationToken}`;
+            `${process.env.CLIENT_URL}/auth/verify/${verificationToken}`;
 
         // email brevo
         await apiInstance.sendTransacEmail({
             sender: {
-                name: "Mon App",
-                email: "tonemail@gmail.com",
+                name: "BUSNESS",
+                email: "sembenecheikh054@gmail.com",
             },
 
             to: [
