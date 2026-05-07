@@ -13,7 +13,6 @@ router.post("/register", async (req, res) => {
 
         const { nom, email, password } = req.body;
 
-        // vérifie si email existe
         const existe = await User.findOne({ email });
 
         if (existe) {
@@ -21,68 +20,44 @@ router.post("/register", async (req, res) => {
                 message: "Email déjà utilisé",
             });
         }
-        res.json({
-   message: "Compte activé avec succès ✅"
-});
 
-
-
-        // hash password
         const hash = await bcrypt.hash(password, 10);
 
-        // génération token
-        const verificationToken = crypto
-            .randomBytes(32)
-            .toString("hex");
+        const verificationToken = crypto.randomBytes(32).toString("hex");
 
-        // création utilisateur
         const user = new User({
             nom,
             email,
             password: hash,
             verificationToken,
+            isVerified: false
         });
 
         await user.save();
 
-        // lien activation
         const activationLink =
             `${process.env.CLIENT_URL}/auth/verify/${verificationToken}`;
 
-        // email brevo
         await apiInstance.sendTransacEmail({
             sender: {
                 name: "BUSNESS",
                 email: "sembenecheikh054@gmail.com",
             },
-
-            to: [
-                {
-                    email: user.email,
-                },
-            ],
-
+            to: [{ email: user.email }],
             subject: "Activation de compte",
-
             htmlContent: `
                 <h2>Bonjour ${user.nom}</h2>
-
-                <p>Cliquez sur le lien ci-dessous pour activer votre compte :</p>
-
-                <a href="${activationLink}">
-                    Activer mon compte
-                </a>
+                <p>Cliquez pour activer :</p>
+                <a href="${activationLink}">Activer mon compte</a>
             `,
         });
 
-        res.json({
+        return res.json({
             message: "Compte créé. Vérifiez votre email ✅",
         });
 
     } catch (err) {
-        console.log(err);
-
-        res.status(500).json({
+        return res.status(500).json({
             error: err.message,
         });
     }
