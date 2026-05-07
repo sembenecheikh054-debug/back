@@ -1,4 +1,3 @@
-// ✅ dotenv simple — lit les variables d'environnement Render
 require("dotenv").config();
 
 const express = require("express");
@@ -9,16 +8,20 @@ const app = express();
 
 const port = process.env.PORT || 5000;
 
-// ✅ 1. cors en premier
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// ✅ 2. routes après
 app.use("/auth", require("./routes/auth.routes"));
 app.use("/post", require("./routes/post.routes"));
 
-// ✅ 3. connexion MongoDB et démarrage du projet
-connectDB().then(() => {
-    app.listen(port, () => console.log("le server a demarré au port " + port));
-});
+connectDB()
+  .then(() => {
+    app.listen(port, () => {
+      console.log("le server a démarré au port " + port);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ Erreur MongoDB :", err.message);
+    process.exit(1);
+  });
