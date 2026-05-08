@@ -11,11 +11,16 @@ const apiInstance = require("../config/brevo");
 router.post("/register", async (req, res) => {
     try {
 
+        console.log("👉 REGISTER HIT"); // 🔥 ICI (entrée route)
+
         const { nom, email, password } = req.body;
+
+        console.log("📩 BODY:", req.body); // 🔥 vérifier données reçues
 
         const existe = await User.findOne({ email });
 
         if (existe) {
+            console.log("❌ EMAIL EXISTE");
             return res.status(400).json({
                 message: "Email déjà utilisé",
             });
@@ -23,7 +28,11 @@ router.post("/register", async (req, res) => {
 
         const hash = await bcrypt.hash(password, 10);
 
+        console.log("🔐 PASSWORD HASHED");
+
         const verificationToken = crypto.randomBytes(32).toString("hex");
+
+        console.log("🔑 TOKEN GENERATED");
 
         const user = new User({
             nom,
@@ -35,8 +44,13 @@ router.post("/register", async (req, res) => {
 
         await user.save();
 
+        console.log("💾 USER SAVED");
+
         const activationLink =
             `${process.env.CLIENT_URL}/active.html?token=${verificationToken}`;
+
+        console.log("📧 SENDING EMAIL...");
+
         await apiInstance.sendTransacEmail({
             sender: {
                 name: "BUSNESS",
@@ -51,17 +65,20 @@ router.post("/register", async (req, res) => {
             `,
         });
 
+        console.log("✅ EMAIL SENT");
+
         return res.json({
             message: "Compte créé. Vérifiez votre email ✅",
         });
 
     } catch (err) {
+        console.log("🔥 ERROR REGISTER:", err); // 🔥 TRÈS IMPORTANT
+
         return res.status(500).json({
             error: err.message,
         });
     }
 });
-
 
 // ACTIVATION
 router.get("/verify/:token", async (req, res) => {
