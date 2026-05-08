@@ -36,8 +36,7 @@ router.post("/register", async (req, res) => {
         await user.save();
 
         const activationLink =
-            `${process.env.CLIENT_URL}/auth/verify/${verificationToken}`;
-
+            `${process.env.CLIENT_URL}/active.html?token=${verificationToken}`;
         await apiInstance.sendTransacEmail({
             sender: {
                 name: "BUSNESS",
