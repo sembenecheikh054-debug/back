@@ -51,20 +51,21 @@ router.post("/register", async (req, res) => {
 
         console.log("📧 SENDING EMAIL...");
 
-        await apiInstance.sendTransacEmail({
-            sender: {
-                name: "BUSNESS",
-                email: "sembenecheikh054@gmail.com",
-            },
-            to: [{ email: user.email }],
-            subject: "Activation de compte",
-            htmlContent: `
-                <h2>Bonjour ${user.nom}</h2>
-                <p>Cliquez pour activer :</p>
-                <a href="${activationLink}">Activer mon compte</a>
-            `,
-        });
+        // await apiInstance.sendTransacEmail({
+        //     sender: {
+        //         name: "BUSNESS",
+        //         email: "sembenecheikh054@gmail.com",
+        //     },
+        //     to: [{ email: user.email }],
+        //     subject: "Activation de compte",
+        //     htmlContent: `
+        //         <h2>Bonjour ${user.nom}</h2>
+        //         <p>Cliquez pour activer :</p>
+        //         <a href="${activationLink}">Activer mon compte</a>
+        //     `,
+        // });
 
+        console.log("Lien activation :", activationLink);
         console.log("✅ EMAIL SENT");
 
         return res.json({
