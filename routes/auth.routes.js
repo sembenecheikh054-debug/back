@@ -53,7 +53,7 @@ router.post("/register", async (req, res) => {
 
         await apiInstance.sendTransacEmail({
             sender: {
-                name: "BUSNESS",
+                name: "RED-PRODUCT",
                 email: "sembenecheikh054@gmail.com",
             },
             to: [{ email: user.email }],
