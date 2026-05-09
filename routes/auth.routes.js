@@ -83,33 +83,23 @@ router.post("/register", async (req, res) => {
 // ACTIVATION
 router.get("/verify/:token", async (req, res) => {
     try {
-
-        const user = await User.findOne({
-            verificationToken: req.params.token,
-        });
+        const user = await User.findOne({ verificationToken: req.params.token });
 
         if (!user) {
-            return res.status(400).json({
-                message: "Token invalide",
-            });
+            return res.status(400).json({ message: "Token invalide" });
         }
 
         user.isVerified = true;
         user.verificationToken = undefined;
-
         await user.save();
 
-        res.json({
-            message: "Compte activé avec succès ✅",
-        });
+        // ✅ redirige vers active.html sur Vercel
+        res.redirect(`${process.env.CLIENT_URL}/active.html?activated=true`);
 
     } catch (err) {
-        res.status(500).json({
-            error: err.message,
-        });
+        res.status(500).json({ error: err.message });
     }
 });
-
 
 // LOGIN
 router.post("/login", async (req, res) => {
