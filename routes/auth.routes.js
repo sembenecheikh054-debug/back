@@ -94,7 +94,7 @@ router.get("/verify/:token", async (req, res) => {
         await user.save();
 
         // ✅ redirige vers active.html sur Vercel
-        res.redirect(`${process.env.CLIENT_URL}/active.html?activated=true`);
+       res.json({ message: "Compte activé avec succès ✅" });
 
     } catch (err) {
         res.status(500).json({ error: err.message });
