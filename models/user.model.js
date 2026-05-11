@@ -13,6 +13,8 @@ const userSchema = new mongoose.Schema({
    verificationToken: {
         type: String,
     },
+      resetToken:       { type: String },        // ✅
+    resetTokenExpiry: { type: Date }           // ✅
     
 });
 

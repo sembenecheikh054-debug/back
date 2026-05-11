@@ -101,6 +101,85 @@ router.get("/verify/:token", async (req, res) => {
     }
 });
 
+//DEUX ROUTES POUR LES MDP
+
+// FORGOT PASSWORD — envoie le mail
+router.post("/forgot-password", async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const user = await User.findOne({ email });
+        if (!user) return res.status(400).json({ message: "Email introuvable" });
+
+        // génère un token
+        const resetToken = crypto.randomBytes(32).toString("hex");
+
+        // sauvegarde avec expiry 1 heure
+        user.resetToken = resetToken;
+        user.resetTokenExpiry = Date.now() + 3600000; // 1h
+        await user.save();
+
+        // lien de réinitialisation
+        const resetLink = `${process.env.CLIENT_URL}/reset-password.html?token=${resetToken}`;
+
+        // envoie l'email
+        await apiInstance.sendTransacEmail({
+            sender: {
+                name: "RED-PRODUCT",
+                email: "sembenecheikh054@gmail.com"
+            },
+            to: [{ email: user.email }],
+            subject: "Réinitialisation de mot de passe",
+            htmlContent: `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2>Bonjour ${user.nom} 👋</h2>
+                    <p>Vous avez demandé une réinitialisation de mot de passe.</p>
+                    <p>Cliquez sur le bouton ci-dessous :</p>
+                    <a href="${resetLink}" 
+                       style="background:#374151; color:white; padding:12px 24px; 
+                              border-radius:8px; text-decoration:none; display:inline-block;">
+                        Réinitialiser mon mot de passe
+                    </a>
+                    <p style="color:gray; margin-top:20px;">Ce lien expire dans 1 heure.</p>
+                </div>
+            `
+        });
+
+        res.json({ message: "Email envoyé ✅ vérifiez votre boîte mail" });
+
+    } catch (err) {
+        console.error("Erreur forgot-password:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// RESET PASSWORD — change le mot de passe
+router.post("/reset-password", async (req, res) => {
+    try {
+        const { token, password } = req.body;
+
+        // cherche l'utilisateur avec le token valide
+        const user = await User.findOne({
+            resetToken: token,
+            resetTokenExpiry: { $gt: Date.now() } // vérifie que le token n'est pas expiré
+        });
+
+        if (!user) return res.status(400).json({ message: "Lien invalide ou expiré" });
+
+        // hash le nouveau mot de passe
+        const hash = await bcrypt.hash(password, 10);
+        user.password = hash;
+        user.resetToken = undefined;
+        user.resetTokenExpiry = undefined;
+        await user.save();
+
+        res.json({ message: "Mot de passe réinitialisé ✅" });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // LOGIN
 router.post("/login", async (req, res) => {
     try {
